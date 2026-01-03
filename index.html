@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Love Anniversary Gift</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&family=Mali:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --primary: #ff6b81;       /* สีชมพูอ่อน */
+            --secondary: #ff4757;     /* สีแดงหัวใจ */
+            --bg-color: #ffe2e7;      /* พื้นหลังหลัก */
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --pink-pastel: #FFC0CB;
+            --text-color: #2f3542;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg-color); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            color: var(--text-color);
+        }
+
+        #app { 
+            width: 100%; max-width: 480px; height: 100%; 
+            background: #fff; position: relative; overflow: hidden; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.1); 
+        }
+        
+        .hidden { display: none !important; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes beat { 0% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } }
+        @keyframes rotateIcon { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- 1. LANDING (3D BOX) --- */
+        #landing-page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe2e7 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 50; transition: transform 0.8s ease-in-out;
+        }
+        
+        /* 3D Box Styles */
+        .box-container { width: 150px; height: 150px; position: relative; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(30deg); transition: transform 1s; cursor: pointer; animation: float 3s infinite ease-in-out; }
+        .box-face { position: absolute; width: 150px; height: 150px; background: var(--pink-pastel); border: 2px solid #fff; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-size: 30px; color: white; }
+        .front  { transform: translateZ(75px); }
+        .back   { transform: rotateY(180deg) translateZ(75px); }
+        .right  { transform: rotateY(90deg) translateZ(75px); }
+        .left   { transform: rotateY(-90deg) translateZ(75px); }
+        .top    { transform: rotateX(90deg) translateZ(75px); background: #ff9eb5; transition: transform 0.6s ease-in; transform-origin: top; } /* Lid */
+        .bottom { transform: rotateX(-90deg) translateZ(75px); box-shadow: 0 0 50px rgba(0,0,0,0.2); }
+
+        .btn-open {
+            margin-top: 60px; padding: 12px 30px; background: var(--secondary); color: white;
+            border: none; border-radius: 50px; font-size: 16px; font-weight: 600;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+            animation: slideUp 0.6s ease-out 0.2s backwards;
+        }
+
+        /* --- 2. PIN SCREEN --- */
+        #pin-page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        #pin-page.active { opacity: 1; pointer-events: auto; }
+        
+        .pin-container { display: flex; gap: 10px; margin-top: 20px; }
+        .pin-input {
+            width: 40px; height: 50px; border: none; background: rgba(255,255,255,0.3);
+            border-radius: 10px; text-align: center; font-size: 24px; color: white; font-weight: bold;
+            backdrop-filter: blur(5px); outline: none; transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .pin-input:focus { background: white; color: var(--secondary); transform: translateY(-3px); }
+        .pin-input::-webkit-outer-spin-button, .pin-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .error-msg { color: white; font-size: 14px; margin-top: 10px; height: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+        /* --- 3. WELCOME SCREEN --- */
+        #welcome-page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        #welcome-page.active { opacity: 1; pointer-events: auto; }
+
+        .welcome-img { width: 80%; max-width: 300px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: float 4s infinite ease-in-out; }
+        .btn-gift {
+            padding: 15px 40px; background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white;
+            border: none; border-radius: 50px; font-size: 18px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 5px 20px rgba(255, 71, 87, 0.5);
+            transition: var(--transition); font-family: 'Mali', cursive;
+        }
+        .btn-gift:hover { transform: scale(1.05); }
+
+        /* --- 4. DASHBOARD --- */
+        #dashboard {
+            height: 100%; overflow-y: auto; background: linear-gradient(to bottom, #fff0f3, #fff); position: relative;
+            padding: 20px; padding-bottom: 100px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        #dashboard.active { opacity: 1; pointer-events: auto; }
+
+        .dash-header { text-align: center; margin-bottom: 30px; }
+        .dash-title { font-size: 26px; font-weight: 700; color: var(--secondary); }
+
+        .menu-card {
+            background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow);
+            transition: var(--transition); cursor: pointer;
+        }
+        .menu-card:hover { transform: translateY(-5px); }
+        .card-icon { font-size: 24px; margin-bottom: 10px; text-align: center; display: block; }
+        .card-name { font-size: 18px; font-weight: 600; text-align: center; color: var(--text-color); }
+        .card-desc { font-size: 12px; text-align: center; color: #888; margin-top: 5px; }
+
+        /* --- A. LOVE COUNTER --- */
+        .timer-container { text-align: center; }
+        .days-big { font-size: 48px; font-weight: 700; color: var(--secondary); line-height: 1; }
+        .time-sub { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .realtime-timer { display: flex; justify-content: center; gap: 5px; font-family: monospace; font-size: 16px; color: #555; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 10px; }
+
+        /* --- B. QUIZ & MODALS --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: white; width: 90%; max-width: 400px; border-radius: 20px;
+            padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        /* Quiz Styles */
+        .quiz-progress { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        .quiz-bar { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333; }
+        .option-btn {
+            display: block; width: 100%; padding: 12px; margin-bottom: 10px;
+            border: 1px solid #eee; border-radius: 10px; background: white;
+            font-size: 16px; cursor: pointer; transition: var(--transition); color: #555;
+        }
+        .option-btn:hover { background: #fff0f3; border-color: var(--primary); }
+        .option-btn.correct { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+
+        /* --- C. LOVE LETTER --- */
+        .envelope-anim {
+            width: 100px; height: 70px; background: var(--pink-pastel); margin: 0 auto 15px;
+            position: relative; border-radius: 5px; box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            cursor: pointer; transition: transform 0.3s;
+        }
+        .envelope-anim:active { transform: scale(0.95); }
+        .envelope-flap { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: #ffb6c1; clip-path: polygon(0 0, 50% 100%, 100% 0); transform-origin: top; transition: transform 0.5s; }
+        .envelope-heart { font-size: 24px; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); transition: transform 0.3s; }
+        
+        .envelope-anim.open .envelope-flap { transform: rotateX(180deg); }
+        .envelope-anim.open .envelope-heart { transform: translate(-50%, -50%) scale(1); animation: float 2s infinite ease-in-out; }
+        
+        .letter-content-modal { text-align: left; padding: 20px; background: #fff0f3; border-radius: 10px; font-family: 'Mali', cursive; font-size: 16px; line-height: 1.6; }
+
+        /* --- D. MEMORIES LIST --- */
+        .memory-item {
+            display: flex; align-items: center; background: white; padding: 10px; border-radius: 15px;
+            margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: var(--transition);
+        }
+        .memory-img {
+            width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pink-pastel);
+            margin-right: 15px;
+        }
+        .memory-info { flex: 1; }
+        .memory-date { font-size: 11px; color: #999; margin-bottom: 2px; }
+        .memory-title { font-size: 16px; font-weight: 600; color: #333; }
+        .memory-desc { font-size: 13px; color: #666; margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Close Button */
+        .close-modal-btn {
+            position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%;
+            cursor: pointer; font-size: 18px; color: #666; display: flex; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- MUSIC -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_2265007789.mp3?filename=romantic-piano-124974.mp3" type="audio/mpeg">
+    </audio>
+    <button id="music-toggle" style="position: absolute; top: 15px; right: 15px; z-index: 200; background: white; border: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer;">🎵</button>
+
+    <!-- 1. LANDING PAGE (3D BOX) -->
+    <div id="landing-page">
+        <h2 style="margin-bottom: 30px; color: var(--secondary); font-weight: 700;">A Special Gift For You ❤</h2>
+        <div class="box-container" onclick="openBox()">
+            <div class="box-face front">❤</div>
+            <div class="box-face back"></div>
+            <div class="box-face left"></div>
+            <div class="box-face right"></div>
+            <div class="box-face top">?</div>
+            <div class="box-face bottom"></div>
+        </div>
+        <button class="btn-open">Open Box</button>
+    </div>
+
+    <!-- 2. PIN SCREEN -->
+    <div id="pin-page">
+        <h2 style="color: white; margin-bottom: 10px;">รหัสผ่าน</h2>
+        <p style="color: rgba(255,255,255,0.8); font-size: 12px;">กรุณากรอกรหัส 6 หลัก</p>
+        <div class="pin-container">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 0)">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 1)">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 2)">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 3)">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 4)">
+            <input type="number" class="pin-input" maxlength="1" oninput="handlePin(this, 5)">
+        </div>
+        <div class="error-msg" id="pin-error"></div>
+    </div>
+
+    <!-- 3. WELCOME SCREEN -->
+    <div id="welcome-page">
+        <!-- ใส่รูปคู่รักของคุณที่นี่ -->
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Couple" class="welcome-img">
+        <h2 style="color: var(--secondary); margin-bottom: 5px;">Happy Anniversary!</h2>
+        <p style="color: #888; margin-bottom: 25px;">ของขวัญพิเศษสำหรับคนพิเศษ</p>
+        <button class="btn-gift" onclick="goToDashboard()">รับของขวัญ 🎁</button>
+    </div>
+
+    <!-- 4. DASHBOARD -->
+    <div id="dashboard">
+        <header class="dash-header">
+            <p style="letter-spacing: 2px; color: #888;">OUR MEMORIES</p>
+            <div class="dash-title">ครบรอบ 1 ปีแล้ว! ❤</div>
+        </header>
+
+        <!-- CARD 1: LOVE COUNTER -->
+        <div class="menu-card" onclick="alert('เราคบกันมานานเท่าไหนนะ!')">
+            <div class="card-icon">📅</div>
+            <div class="card-name">เรารักกันนานเท่าไหร่</div>
+            <div class="card-desc">Love Counter</div>
+            <div class="timer-container">
+                <div class="days-big" id="days-count">0</div>
+                <div class="time-sub">DAYS TOGETHER</div>
+                <div class="realtime-timer" id="live-timer">00d 00h 00m 00s</div>
+            </div>
+        </div>
+
+        <!-- CARD 2: QUIZ GAME -->
+        <div class="menu-card" onclick="quizModule.openModal()">
+            <div class="card-icon">🎮</div>
+            <div class="card-name">ทดสอบใจฉัน</div>
+            <div class="card-desc">รู้จักฉันไหม?</div>
+        </div>
+
+        <!-- CARD 3: LOVE LETTER -->
+        <div class="menu-card" onclick="letterModule.openModal()">
+            <div class="card-icon">💌</div>
+            <div class="card-name">จดหมายถึงคนสำคัญ</div>
+            <div class="card-desc">ความใจจากฉัน</div>
+        </div>
+
+        <!-- CARD 4: MEMORIES -->
+        <div class="menu-card" onclick="memoriesModule.openModal()">
+            <div class="card-icon">📸</div>
+            <div class="card-name">ความทรงจำของเรา</div>
+            <div class="card-desc">Timeline ความทรงจำ</div>
+        </div>
+        <br><br>
+    </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- QUIZ MODAL -->
+<div class="modal" id="quiz-modal">
+    <div class="modal-content">
+        <button class="close-modal-btn" onclick="quizModule.closeModal()">×</button>
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">Mini Game ❤</h3>
+        <div class="quiz-progress"><div class="quiz-bar" id="quiz-bar"></div></div>
+        <div id="quiz-content">
+            <div class="question-text" id="question-text">Loading...</div>
+            <div id="options-container"></div>
+        </div>
+        <div id="quiz-result" class="hidden">
+            <h2 id="score-text"></h2>
+            <p>ขอบคุณที่อยู่ข้างกันมาตลอด ❤</p>
+            <button class="btn-open" onclick="quizModule.init()">เล่นใหม่</button>
+        </div>
+    </div>
+</div>
+
+<!-- LETTER MODAL -->
+<div class="modal" id="letter-modal">
+    <div class="modal-content">
+        <button class="close-modal-btn" onclick="letterModule.closeModal()">×</button>
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">จดหมายจากใจ</h3>
+        <div class="letter-content-modal">
+            ถึงคนที่ฉันรักที่สุด,<br><br>
+            ขอบคุณที่อยู่ข้างกันมาตลอดทั้งปีที่ผ่านมา ไม่ว่าจะยากหรือง่าย แต่เราก็ผ่านมาด้วยกัน<br><br>
+            วันนี้เป็นวันครบรอบ 1 ปีของเรา ฉันขอให้ความรักและความสุขของเรายาวนานนนับร้อยปีเหมือนชื่อเพลงได้ไหม?<br><br>
+            รักเธอนะ ❤
+        </div>
+    </div>
+</div>
+
+<!-- MEMORIES MODAL -->
+<div class="modal" id="memories-modal">
+    <div class="modal-content" style="max-width: 450px; text-align: left;">
+        <button class="close-modal-btn" onclick="memoriesModule.closeModal()">×</button>
+        <h3 style="text-align: center; margin-bottom: 20px; color: var(--secondary);">Timeline of Us</h3>
+        <div id="memories-list" style="max-height: 60vh; overflow-y: auto;">
+            <!-- JS Injection -->
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ============================================================
+       DATA STRUCTURES (JSON) 
+       แก้ไขข้อมูลตรงนี้ได้เลยครับ!
+       ============================================================ */
+    
+    // 1. QUIZ DATA
+    const QUIZ_DATA = [
+        { question: "วันแรกที่เราไปเดทกันไปที่ไหน?", options: ["ร้านอาหาร", "หนัง", "สวนสาธารณะ"], answer: 0 },
+        { question: "เครื่องดื่มที่ฉันชอบที่สุดคืออะไร?", options: ["นมชา", "กาแฟ", "โคล่า"], answer: 1 },
+        { question: "ฉันกลัวอะไรที่สุด?", options: ["แมลงสาย", "ความสูง", "ผี"], answer: 1 },
+        { question: "สิ่งที่คุณอยากให้ฉันทำมากที่สุดคือ?", options: ["ทำกับข้าว", "ดูแลตัวเอง", "เล่นกับคุณ"], answer: 2 },
+        { question: "ฉันรักคุณไหม?", options: ["ไม่รัก", "รักน้อย", "รักที่สุด"], answer: 2 }
+    ];
+
+    // 2. MEMORIES DATA
+    const MEMORIES_DATA = [
+        { date: "14 ก.พ. 2023", title: "วันแรกที่ได้เจอ", img: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=150&h=150&fit=crop", desc: "เจอกันครั้งแรกที่คาเฟ่" },
+        { date: "01 มิ.ย. 2023", title: "วันเกิดปีแรก", img: "https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=150&h=150&fit=crop", desc: "ฉันจัดเค้กให้คุณ" },
+        { date: "15 ธ.ค. 2023", title: "เที่ยวทะเลสี", img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=150&h=150&fit=crop", desc: "ไปเที่ยวทะเลหัวหินด้วยกัน" },
+        { date: "31 ธ.ค. 2023", title: "นับถอยหลังส่งท้ายปี", img: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=150&h=150&fit=crop", desc: "นับถอยหลังส่งท้ายปีร่วมกัน" }
+    ];
+
+    /* ============================================================
+       CONFIG & LOGIC
+       ============================================================ */
+    const CONFIG = {
+        PIN: "140225", // รหัสผ่าน 6 หลัก
+        START_DATE: new Date("2023-01-01") // วันเริ่มคบ
+    };
+
+    // --- SCENE MANAGER ---
+    const scenes = {
+        landing: document.getElementById('landing-page'),
+        pin: document.getElementById('pin-page'),
+        welcome: document.getElementById('welcome-page'),
+        dashboard: document.getElementById('dashboard')
+    };
+
+    function openBox() {
+        // 1. Animate Box Opening
+        document.querySelector('.box-container').style.transform = "rotateX(-20deg) rotateY(30deg) scale(0.8)";
+        document.querySelector('.box-face.top').style.transform = "rotateX(180deg)"; // Open lid
+        
+        // 2. Transition to PIN
+        setTimeout(() => {
+            scenes.landing.style.opacity = '0';
+            setTimeout(() => {
+                scenes.landing.classList.add('hidden');
+                scenes.pin.classList.remove('hidden');
+                setTimeout(() => scenes.pin.classList.add('active'), 50);
+                document.querySelector('.pin-input').focus();
+            }, 500);
+        }, 600);
+    }
+
+    function handlePin(input, index) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value.length === 1) {
+            const next = document.querySelectorAll('.pin-input')[index + 1];
+            if (next) next.focus();
+            else checkPin();
+        }
+    }
+
+    function checkPin() {
+        const inputs = document.querySelectorAll('.pin-input');
+        const pin = Array.from(inputs).map(i => i.value).join('');
+        const errorMsg = document.getElementById('pin-error');
+        
+        if (pin === CONFIG.PIN) {
+            // Success
+            scenes.pin.classList.remove('active');
+            setTimeout(() => {
+                scenes.pin.classList.add('hidden');
+                scenes.welcome.classList.remove('hidden');
+                setTimeout(() => scenes.welcome.classList.add('active'), 50);
+            }, 500);
+        } else {
+            // Fail
+            errorMsg.innerText = "รหัสผ่านไม่ถูกต้อง!";
+            inputs.forEach(i => {
+                i.value = '';
+                i.style.animation = 'shake 0.3s';
+            });
+            setTimeout(() => inputs.forEach(i => i.style.animation = ''), 500);
+        }
+    }
+
+    function goToDashboard() {
+        scenes.welcome.classList.remove('active');
+        setTimeout(() => {
+            scenes.welcome.classList.add('hidden');
+            scenes.dashboard.classList.remove('hidden');
+            setTimeout(() => {
+                scenes.dashboard.classList.add('active');
+                app.init();
+            }, 50);
+        }, 500);
+    }
+
+    // --- APP INIT ---
+    const app = {
+        init: function() {
+            timerModule.start();
+            memoriesModule.renderList();
+            playMusic();
+        }
+    };
+
+    // --- TIMER MODULE ---
+    const timerModule = {
+        start: function() {
+            const update = () => {
+                const now = new Date();
+                const diff = now - CONFIG.START_DATE;
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                document.getElementById('days-count').innerText = days;
+                
+                const d = String(days).padStart(2, '0');
+                const h = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                
+                document.getElementById('live-timer').innerText = `${d}d ${h}h ${m}m ${s}s`;
+            };
+            update();
+            setInterval(update, 1000);
+        }
+    };
+
+    // --- QUIZ MODULE ---
+    const quizModule = {
+        currentIdx: 0,
+        score: 0,
+        
+        openModal: function() {
+            this.init();
+            document.getElementById('quiz-modal').classList.add('active');
+        },
+        closeModal: function() {
+            document.getElementById('quiz-modal').classList.remove('active');
+        },
+        init: function() {
+            this.currentIdx = 0;
+            this.score = 0;
+            document.getElementById('quiz-content').classList.remove('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            this.renderQuestion();
+        },
+        renderQuestion: function() {
+            const data = QUIZ_DATA[this.currentIdx];
+            document.getElementById('question-text').innerText = `ข้อ ${this.currentIdx + 1}: ${data.question}`;
+            
+            const progress = ((this.currentIdx) / QUIZ_DATA.length) * 100;
+            document.getElementById('quiz-bar').style.width = `${progress}%`;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => this.checkAnswer(idx, btn);
+                container.appendChild(btn);
+            });
+        },
+        checkAnswer: function(idx, btn) {
+            const data = QUIZ_DATA[this.currentIdx];
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true); // Disable all
+
+            if (idx === data.answer) {
+                btn.classList.add('correct');
+                this.score++;
+            } else {
+                btn.classList.add('wrong');
+                allBtns[data.answer].classList.add('correct'); // Show correct
+            }
+
+            setTimeout(() => {
+                this.nextQuestion();
+            }, 1000);
+        },
+        nextQuestion: function() {
+            this.currentIdx++;
+            if (this.currentIdx < QUIZ_DATA.length) {
+                this.renderQuestion();
+            } else {
+                this.showResult();
+            }
+        },
+        showResult: function() {
+            document.getElementById('quiz-content').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('quiz-bar').style.width = `100%`;
+            document.getElementById('score-text').innerText = `ได้ ${this.score}/${QUIZ_DATA.length} คะแนน!`;
+        }
+    };
+
+    // --- LETTER MODULE ---
+    const letterModule = {
+        openModal: function() {
+            document.getElementById('letter-modal').classList.add('active');
+        },
+        closeModal: function() {
+            document.getElementById('letter-modal').classList.remove('active');
+        }
+    };
+
+    // --- MEMORIES MODULE ---
+    const memoriesModule = {
+        openModal: function() {
+            document.getElementById('memories-modal').classList.add('active');
+        },
+        closeModal: function() {
+            document.getElementById('memories-modal').classList.remove('active');
+        },
+        renderList: function() {
+            const container = document.getElementById('memories-list');
+            container.innerHTML = '';
+            
+            MEMORIES_DATA.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'memory-item';
+                div.innerHTML = `
+                    <img src="${item.img}" class="memory-img" alt="Memory">
+                    <div class="memory-info">
+                        <div class="memory-date">${item.date}</div>
+                        <div class="memory-title">${item.title}</div>
+                        <div class="memory-desc">${item.desc}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    };
+
+    // --- MUSIC ---
+    let isPlaying = false;
+    const audio = document.getElementById('bg-music');
+    const musicBtn = document.getElementById('music-toggle');
+    
+    function playMusic() {
+        if(!isPlaying) {
+            audio.play().then(() => {
+                isPlaying = true;
+                musicBtn.innerText = '⏸';
+                musicBtn.classList.add('playing');
+                musicBtn.style.animation = 'rotateIcon 3s linear infinite';
+            }).catch(e => console.log("Autoplay blocked"));
+        }
+    }
+    
+    musicBtn.onclick = () => {
+        if(isPlaying) {
+            audio.pause();
+            musicBtn.innerText = '🎵';
+            musicBtn.classList.remove('playing');
+            musicBtn.style.animation = 'none';
+        } else {
+            audio.play();
+            musicBtn.innerText = '⏸';
+            musicBtn.classList.add('playing');
+            musicBtn.style.animation = 'rotateIcon 3s linear infinite';
+        }
+        isPlaying = !isPlaying;
+    };
+
+</script>
+</body>
+</html>
